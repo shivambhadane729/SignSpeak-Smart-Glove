@@ -1,0 +1,20 @@
+# System Architecture Diagram
+
+This file should contain a PNG image showing the system architecture.
+
+To add:
+1. Create a diagram showing:
+   - Hardware layer (ESP32, sensors)
+   - Communication layer (Bluetooth)
+   - Software layer (Python application)
+   - ML layer (Random Forest classifier)
+   - AI layer (Gemini API)
+   - Output layer (TTS)
+
+2. Save as system_architecture.png in this directory
+
+Tools to create:
+- Draw.io / diagrams.net
+- Lucidchart
+- PowerPoint / Google Slides
+

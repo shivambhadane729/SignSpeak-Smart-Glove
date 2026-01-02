@@ -1,0 +1,17 @@
+# Fritzing Circuit Diagram
+
+This file should contain a Fritzing (.fzz) file with the circuit diagram.
+
+To create:
+1. Open Fritzing
+2. Add components:
+   - ESP32 DevKit
+   - 5x Flex Sensors
+   - MPU6050
+   - Battery and charger
+   - Resistors
+3. Connect according to esp32.ino pin definitions
+4. Save as circuit_diagram.fzz
+
+Note: This is a placeholder. Replace with actual Fritzing file.
+

@@ -1,0 +1,19 @@
+# Circuit Diagram
+
+This file should contain a PNG image showing the hardware circuit connections.
+
+To add:
+1. Create a circuit diagram showing:
+   - ESP32 connections
+   - Flex sensor connections (5 sensors)
+   - MPU6050 I2C connections
+   - Battery and charging module
+   - Resistor values
+
+2. Save as circuit_diagram.png in this directory
+
+Tools:
+- Fritzing (hardware/circuit_diagram.fzz)
+- KiCad
+- EasyEDA
+

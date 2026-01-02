@@ -1,0 +1,28 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Python files
+*.py text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# Configuration files
+*.ini text eol=lf
+*.conf text eol=lf
+*.env text eol=lf
+
+# Arduino files
+*.ino text eol=lf
+
+# Binary files
+*.pkl binary
+*.pb binary
+*.h5 binary
+*.tflite binary
+*.mp3 binary
+*.wav binary
+*.png binary
+*.jpg binary
+*.pdf binary
+

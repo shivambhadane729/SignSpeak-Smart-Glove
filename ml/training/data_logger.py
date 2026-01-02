@@ -12,7 +12,9 @@ SAMPLES_PER_GESTURE = 120
 # -----------------------------------
 
 label = input("Enter gesture label (e.g., HELLO, YES): ").strip().upper()
-filename = f"{label}_dynamic.csv"
+dataset_path = os.path.join(os.path.dirname(__file__), "..", "dataset")
+os.makedirs(dataset_path, exist_ok=True)
+filename = os.path.join(dataset_path, f"{label}_dynamic.csv")
 
 file_exists = os.path.isfile(filename)
 

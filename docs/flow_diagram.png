@@ -1,0 +1,15 @@
+# Flow Diagram
+
+This file should contain a PNG image showing the data flow.
+
+To add:
+1. Create a flowchart showing:
+   - Sensor data collection
+   - Data preprocessing
+   - Feature extraction
+   - Gesture classification
+   - Sentence generation
+   - Speech output
+
+2. Save as flow_diagram.png in this directory
+

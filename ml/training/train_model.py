@@ -12,8 +12,8 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.preprocessing import LabelEncoder
 
 # ---------------- SETTINGS ----------------
-DATASET_PATH = "."              # Same folder
-MODEL_NAME = "gesture_model.pkl"
+DATASET_PATH = os.path.join(os.path.dirname(__file__), "..", "dataset")  # ml/dataset/
+MODEL_NAME = os.path.join(os.path.dirname(__file__), "..", "models", "gesture_model.pkl")
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
 # ------------------------------------------
@@ -114,7 +114,8 @@ else:
 
 # ---------------- SAVE MODEL ----------------
 joblib.dump(model, MODEL_NAME)
-joblib.dump(label_encoder, "label_encoder.pkl")
+encoder_path = os.path.join(os.path.dirname(__file__), "..", "models", "label_encoder.pkl")
+joblib.dump(label_encoder, encoder_path)
 
 print(f"\n💾 Model saved as '{MODEL_NAME}'")
-print("💾 Label encoder saved as 'label_encoder.pkl'")
+print(f"💾 Label encoder saved as '{encoder_path}'")

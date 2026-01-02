@@ -1,15 +1,74 @@
 # Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# API keys
-*.key
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model files (large binary files) - uncomment if you want to exclude models
+# *.pkl
+# *.h5
+# *.pb
+# *.tflite
+
+# Keep trained models in ml/models/ but ignore backups
+ml/models/*.pkl.bak
+
+# Data files (uncomment if you don't want to commit datasets)
+# *.csv
+# ml/dataset/*.csv
+
+# Temporary files
+temp_speech.mp3
+*.mp3
+*.wav
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Arduino
+*.hex
+*.elf
+
+# Documentation builds
+docs/_build/
