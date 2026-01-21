@@ -1,0 +1,516 @@
+/**
+ * SignSpeak – White Theme with Dark Blue Accents
+ * Minimal • Accessible • Professional
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background: #f8fafc;
+  /* soft white */
+  color: #1e293b;
+  /* dark slate */
+  min-height: 100vh;
+}
+
+/* Root */
+.App {
+  max-width: 1100px;
+  margin: auto;
+  padding: 28px 20px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 14px;
+}
+
+.language-selector {
+  margin-left: auto;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.lang-select {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background-color: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+}
+
+.lang-select:hover {
+  background-color: #f8fafc;
+}
+
+.lang-select:focus {
+  background-color: #f1f5f9;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: #1e3a8a;
+  /* dark blue */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+}
+
+.logo-text h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.logo-text p {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Connection Status */
+.connection-status {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.connection-status.connecting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Grid */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards */
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Card Titles */
+.card-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #0f172a;
+  margin-bottom: 14px;
+}
+
+/* Gesture */
+.gesture-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.gesture-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  margin-bottom: 14px;
+  color: #1e40af;
+}
+
+.gesture-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #020617;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confidence-badge {
+  background: #1e3a8a;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #e0e7ff;
+}
+
+.gesture-subtext {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* Latency */
+.card.latency {
+  background: #eff6ff;
+}
+
+.latency-value {
+  font-size: 40px;
+  font-weight: 600;
+  text-align: center;
+  color: #1e40af;
+  margin-top: 18px;
+}
+
+.latency-label {
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Sentence */
+.sentence-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.sentence-text {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+  min-height: 110px;
+}
+
+/* Speech Button */
+.speak-btn {
+  margin-top: 10px;
+  background: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.speak-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.speak-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Languages */
+.languages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.language-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  border-radius: 10px;
+  padding: 14px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.language-btn.active {
+  background: #1e3a8a;
+  color: #e0e7ff;
+  border-color: #1e3a8a;
+}
+
+.language-btn span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.language-btn.active span {
+  color: #c7d2fe;
+}
+
+/* Footer */
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Subtle pulse */
+.pulse {
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ============================= */
+/* Gemini Emergency Toggle */
+/* ============================= */
+
+.gemini-toggle {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 0 20px 0;
+}
+
+.gemini-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+/* Hide default checkbox */
+.gemini-toggle input {
+  appearance: none;
+  width: 44px;
+  height: 24px;
+  background: #cbd5f5;
+  border-radius: 999px;
+  position: relative;
+  transition: background 0.3s ease;
+  cursor: pointer;
+}
+
+/* Toggle knob */
+.gemini-toggle input::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+/* ON state */
+.gemini-toggle input:checked {
+  background: #1e3a8a;
+}
+
+.gemini-toggle input:checked::before {
+  transform: translateX(20px);
+}
+
+/* ============================= */
+/* LOGS COMPONENT */
+/* ============================= */
+
+.logs-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fdfdfd;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.no-logs {
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+.log-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid #f1f5f9;
+}
+
+.log-time {
+  color: #94a3b8;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.log-msg {
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Log Types */
+.log-item.info {
+  border-left: 3px solid #3b82f6;
+}
+
+.log-item.success {
+  border-left: 3px solid #10b981;
+}
+
+.log-item.error {
+  border-left: 3px solid #ef4444;
+}
+
+.log-item.gesture {
+  border-left: 3px solid #8b5cf6;
+  background: #f5f3ff;
+}
+
+/* ============================= */
+/* SETTINGS COMPONENT */
+/* ============================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.settings-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.settings-btn.active {
+  background: #e0f2fe;
+  color: #0284c7;
+  border-color: #0284c7;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-content label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.ip-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.ip-input-group input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: monospace;
+}
+
+.test-btn {
+  padding: 0 16px;
+  background: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.test-btn:hover {
+  background: #334155;
+}
+
+.hint {
+  font-size: 12px;
+  color: #64748b;
+}

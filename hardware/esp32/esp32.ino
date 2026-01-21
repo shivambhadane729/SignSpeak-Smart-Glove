@@ -6,10 +6,10 @@
 #include <Wire.h>
 
 // ---------- FLEX SENSOR PINS (ADC1 ONLY) ----------
-#define FLEX_INDEX 32
-#define FLEX_MIDDLE 35
-#define FLEX_RING 34
-#define FLEX_PINKY 33
+#define FLEX_INDEX   32
+#define FLEX_MIDDLE  35
+#define FLEX_RING    34
+#define FLEX_PINKY   33
 
 // ---------- MPU6050 ----------
 #define MPU_ADDRESS 0x68
@@ -31,26 +31,25 @@ int16_t gyroX, gyroY, gyroZ;
 
 // ---------- TIMING ----------
 unsigned long lastSendTime = 0;
-const int SEND_INTERVAL = 50; // 20 Hz
+const int SEND_INTERVAL = 50;  // 20 Hz
 
 // ==================================================
 // SETUP
 // ==================================================
-void setup()
-{
+void setup() {
   Serial.begin(115200);
 
   // ---- ESP32 ADC CONFIG ----
-  analogReadResolution(12);       // 0–4095
-  analogSetAttenuation(ADC_11db); // Full 3.3V range
+  analogReadResolution(12);          // 0–4095
+  analogSetAttenuation(ADC_11db);    // Full 3.3V range
 
   // ---- I2C INIT ----
   Wire.begin(SDA_PIN, SCL_PIN);
 
   // ---- MPU6050 INIT ----
   Wire.beginTransmission(MPU_ADDRESS);
-  Wire.write(0x6B); // Power management
-  Wire.write(0x00); // Wake up
+  Wire.write(0x6B);     // Power management
+  Wire.write(0x00);     // Wake up
   Wire.endTransmission(true);
 
   // Accelerometer ±2g
@@ -66,10 +65,8 @@ void setup()
   Wire.endTransmission(true);
 
   // Init flex buffers
-  for (int i = 0; i < 4; i++)
-  {
-    for (int j = 0; j < SAMPLE_SIZE; j++)
-    {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < SAMPLE_SIZE; j++) {
       flexBuffer[i][j] = 0;
     }
   }
@@ -80,36 +77,29 @@ void setup()
 // ==================================================
 // LOOP
 // ==================================================
-void loop()
-{
-  if (millis() - lastSendTime >= SEND_INTERVAL)
-  {
+void loop() {
+  if (millis() - lastSendTime >= SEND_INTERVAL) {
     lastSendTime = millis();
 
     int flexPins[4] = {FLEX_INDEX, FLEX_MIDDLE, FLEX_RING, FLEX_PINKY};
     int flexValues[4];
 
     // ---------- FLEX SENSOR READ ----------
-    for (int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
       int raw = analogRead(flexPins[i]);
       flexBuffer[i][bufferIndex] = raw;
 
       long sum = 0;
-      for (int j = 0; j < SAMPLE_SIZE; j++)
-      {
+      for (int j = 0; j < SAMPLE_SIZE; j++) {
         sum += flexBuffer[i][j];
       }
 
       int smooth = sum / SAMPLE_SIZE;
 
       // ---- SAFETY CHECK FOR BAD CALIBRATION ----
-      if (FLEX_MAX[i] - FLEX_MIN[i] < 100)
-      {
+      if (FLEX_MAX[i] - FLEX_MIN[i] < 100) {
         flexValues[i] = 0;
-      }
-      else
-      {
+      } else {
         flexValues[i] = map(smooth, FLEX_MIN[i], FLEX_MAX[i], 0, 100);
         flexValues[i] = constrain(flexValues[i], 0, 100);
       }
@@ -127,8 +117,7 @@ void loop()
     accelY = Wire.read() << 8 | Wire.read();
     accelZ = Wire.read() << 8 | Wire.read();
 
-    Wire.read();
-    Wire.read(); // temperature discard
+    Wire.read(); Wire.read(); // temperature discard
 
     gyroX = Wire.read() << 8 | Wire.read();
     gyroY = Wire.read() << 8 | Wire.read();
@@ -144,24 +133,16 @@ void loop()
     float gyroZdeg = gyroZ / 131.0;
 
     // ---------- SERIAL OUTPUT ----------
-    Serial.print(flexValues[0]);
-    Serial.print(",");
-    Serial.print(flexValues[1]);
-    Serial.print(",");
-    Serial.print(flexValues[2]);
-    Serial.print(",");
-    Serial.print(flexValues[3]);
-    Serial.print(",");
-    Serial.print(accelXg, 2);
-    Serial.print(",");
-    Serial.print(accelYg, 2);
-    Serial.print(",");
-    Serial.print(accelZg, 2);
-    Serial.print(",");
-    Serial.print(gyroXdeg, 2);
-    Serial.print(",");
-    Serial.print(gyroYdeg, 2);
-    Serial.print(",");
+    Serial.print(flexValues[0]); Serial.print(",");
+    Serial.print(flexValues[1]); Serial.print(",");
+    Serial.print(flexValues[2]); Serial.print(",");
+    Serial.print(flexValues[3]); Serial.print(",");
+    Serial.print(accelXg, 2); Serial.print(",");
+    Serial.print(accelYg, 2); Serial.print(",");
+    Serial.print(accelZg, 2); Serial.print(",");
+    Serial.print(gyroXdeg, 2); Serial.print(",");
+    Serial.print(gyroYdeg, 2); Serial.print(",");
     Serial.println(gyroZdeg, 2);
   }
 }
+
