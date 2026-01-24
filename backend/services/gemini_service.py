@@ -4,7 +4,7 @@ from config import GEMINI_API_KEY
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-def enhance_sentence(sentence: str, target_lang: str = "en") -> str:
+async def enhance_sentence(sentence: str, target_lang: str = "en") -> str:
     if not sentence:
         return sentence
 
@@ -27,7 +27,7 @@ def enhance_sentence(sentence: str, target_lang: str = "en") -> str:
 
     try:
         print(f"✨ Calling Gemini... Input: '{sentence}' -> Lang: {target_lang}")
-        response = model.generate_content(prompt)
+        response = await model.generate_content_async(prompt)
         text = response.text.strip().split("\n")[0] # Ensure single line
         # Cleanup quotes if Gemini adds them
         text = text.replace('"', '').replace("'", "")

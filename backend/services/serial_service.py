@@ -3,6 +3,7 @@ import serial.tools.list_ports
 import threading
 import time
 import logging
+from services.data_store import data_store
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -14,11 +15,6 @@ class SerialService:
         self.baud_rate = baud_rate
         self.ser = None
         self.running = False
-        self.latest_data = {
-            "ax": 0, "ay": 0, "az": 0,
-            "gx": 0, "gy": 0, "gz": 0,
-            "flex": [0, 0, 0, 0, 0]
-        }
         self.thread = None
         self.lock = threading.Lock()
 
@@ -62,42 +58,37 @@ class SerialService:
     def _read_loop(self):
         while self.running and self.ser and self.ser.is_open:
             try:
-                line = self.ser.readline().decode('utf-8').strip()
+                line = self.ser.readline().decode('utf-8', errors='ignore').strip()
                 if not line:
                     continue
                 
-                # Expected format: "f1,f2,f3,ax,ay,az,gx,gy,gz" (9 values)
-                parts = line.split(',')
-                if len(parts) == 9:
-                    with self.lock:
-                        # Flex sensors (first 3)
-                        self.latest_data["flex"] = [float(x) for x in parts[:3]]
-                        
-                        # IMU data (next 6)
-                        self.latest_data["ax"] = float(parts[3])
-                        self.latest_data["ay"] = float(parts[4])
-                        self.latest_data["az"] = float(parts[5])
-                        self.latest_data["gx"] = float(parts[6])
-                        self.latest_data["gy"] = float(parts[7])
-                        self.latest_data["gz"] = float(parts[8])
-                        self.latest_data["ay"] = float(parts[6])
-                        self.latest_data["az"] = float(parts[7])
-                        self.latest_data["gx"] = float(parts[8])
-                        self.latest_data["gy"] = float(parts[9])
-                        self.latest_data["gz"] = float(parts[10])
-                        
-            except ValueError:
-                continue # Ignore parse errors
+                # Format: "FLEX:f1,f2,f3,f4 | ACC:ax,ay,az | GYR:gx,gy,gz"
+                if "FLEX:" in line and "| ACC:" in line:
+                    parts = line.split('|')
+                    
+                    flex_str = parts[0].split(':')[1]
+                    acc_str = parts[1].split(':')[1]
+                    gyr_str = parts[2].split(':')[1]
+
+                    flex_vals = [float(x) for x in flex_str.split(',')]
+                    acc_vals = [float(x) for x in acc_str.split(',')]
+                    gyr_vals = [float(x) for x in gyr_str.split(',')]
+
+                    # Update Global Data Store
+                    data_store.update({
+                        "flex": flex_vals,
+                        "ax": acc_vals[0], "ay": acc_vals[1], "az": acc_vals[2],
+                        "gx": gyr_vals[0], "gy": gyr_vals[1], "gz": gyr_vals[2]
+                    })
+
+            except (ValueError, IndexError):
+                continue # Ignore parse errors (common during startup)
             except serial.SerialException:
                 logger.error("Serial connection lost")
                 break
             except Exception as e:
                 logger.error(f"Error in serial loop: {e}")
                 time.sleep(1)
-
-    def get_data(self):
-        with self.lock:
-            return self.latest_data.copy()
 
 # Global instance
 serial_service = SerialService()

@@ -15,6 +15,7 @@ function App() {
   const [backendIP, setBackendIP] = useState(localStorage.getItem('backendIP') || 'localhost');
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, analytics, history, settings
+  const [isSystemOn, setIsSystemOn] = useState(true);
 
   const autoSpeakRef = useRef(autoSpeak);
   const lastSpokenGesture = useRef(null);
@@ -41,6 +42,7 @@ function App() {
     const { signal } = controller;
 
     const pollInterval = setInterval(() => {
+      if (!isSystemOn) return;
       const startTime = performance.now();
 
       fetch(`${BACKEND_URL}?use_gemini=${useGemini}&lang=${language}`, { signal })
@@ -99,7 +101,7 @@ function App() {
       controller.abort();
       clearInterval(pollInterval);
     };
-  }, [useGemini, gesture, backendIP, language]);
+  }, [useGemini, gesture, backendIP, language, isSystemOn]);
 
   // ---------------- TTS ----------------
   const speakSentence = async (text) => {
@@ -149,8 +151,17 @@ function App() {
 
       {/* HEADER */}
       <header className="app-header">
-        <h3>Dashboard</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            className={`power-btn ${isSystemOn ? 'on' : 'off'}`}
+            onClick={() => setIsSystemOn(!isSystemOn)}
+          >
+            <i className="fas fa-power-off"></i>
+          </div>
+          <h3>SignSpeak</h3>
+        </div>
         <div className="header-icons">
+          <div className={`status-dot ${isConnected ? 'online' : 'offline'}`}></div>
           <div className="profile-avatar">S</div>
         </div>
       </header>
@@ -170,11 +181,11 @@ function App() {
               </div>
 
               <div className="hero-text">
-                {gesture === 'WAITING' ? '...' : gesture}
+                {!isSystemOn ? 'PAUSED' : (gesture === 'WAITING' ? '...' : gesture)}
               </div>
 
               <div className="confidence-badge">
-                Confidence: {gesture === 'WAITING' ? '0%' : '94%'}
+                {!isSystemOn ? 'System Offline' : `Confidence: ${gesture === 'WAITING' ? '0%' : '94%'}`}
               </div>
 
               <div style={{ textAlign: 'center', marginTop: 15 }}>

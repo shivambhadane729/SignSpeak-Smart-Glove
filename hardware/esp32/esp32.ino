@@ -1,148 +1,181 @@
-// ============================================
-// ESP32 CODE FOR SIGNALOUD SMART GLOVE
-// 4 Flex Sensors (ADC1) + MPU6050
-// ============================================
-
 #include <Wire.h>
+#include <MPU6050.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
 
-// ---------- FLEX SENSOR PINS (ADC1 ONLY) ----------
-#define FLEX_INDEX   32
-#define FLEX_MIDDLE  35
-#define FLEX_RING    34
-#define FLEX_PINKY   33
+// ================= WIFI =================
+const char* ssid = "ESP32_NET";
+const char* password = "12345678";
 
-// ---------- MPU6050 ----------
-#define MPU_ADDRESS 0x68
-#define SDA_PIN 21
-#define SCL_PIN 22
+// ================= UDP =================
+WiFiUDP udp;
+const char* laptopIP = "192.168.137.1";   // Windows Hotspot Default IP
+const int udpPort = 5005;
 
-// ---------- CALIBRATION VALUES (UPDATE AFTER CALIBRATION) ----------
-int FLEX_MIN[4] = {1200, 1150, 1180, 1170};
-int FLEX_MAX[4] = {3200, 3300, 3250, 3280};
+// ================= MPU =================
+MPU6050 mpu(0x68);
 
-// ---------- FILTERING ----------
-const int SAMPLE_SIZE = 5;
-int flexBuffer[4][SAMPLE_SIZE];
-int bufferIndex = 0;
+// ================= FLEX =================
+const int FLEX_COUNT = 4;
+const int flexPins[FLEX_COUNT] = {34, 35, 32, 33};
 
-// ---------- MPU DATA ----------
-int16_t accelX, accelY, accelZ;
-int16_t gyroX, gyroY, gyroZ;
+int flexRaw[FLEX_COUNT];
+int flexMin[FLEX_COUNT] = {4095, 4095, 4095, 4095};
+int flexMax[FLEX_COUNT] = {0, 0, 0, 0};
+float flexNorm[FLEX_COUNT];
+float flexSmooth[FLEX_COUNT];
 
-// ---------- TIMING ----------
-unsigned long lastSendTime = 0;
-const int SEND_INTERVAL = 50;  // 20 Hz
+// ================= MPU VALUES =================
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
 
-// ==================================================
-// SETUP
-// ==================================================
+// Gyro bias
+float gyroBiasX = 0, gyroBiasY = 0, gyroBiasZ = 0;
+
+// Smoothed MPU
+float accSmooth[3] = {0, 0, 0};
+float gyroSmooth[3] = {0, 0, 0};
+
+// ================= PARAMS =================
+const float SMOOTH_ALPHA = 0.7;
+const int GYRO_CALIB_SAMPLES = 300;
+const int ADC_SAMPLES = 10; // Noise Reduction: Average 10 samples
+
+// =================================================
+void connectWiFi() {
+  Serial.print("Connecting to WiFi");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi Connected!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+// =================================================
+void calibrateGyro() {
+  Serial.println("Calibrating Gyro...");
+  long sx = 0, sy = 0, sz = 0;
+
+  for (int i = 0; i < GYRO_CALIB_SAMPLES; i++) {
+    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    sx += gx;
+    sy += gy;
+    sz += gz;
+    delay(5);
+  }
+
+  gyroBiasX = (float)sx / GYRO_CALIB_SAMPLES;
+  gyroBiasY = (float)sy / GYRO_CALIB_SAMPLES;
+  gyroBiasZ = (float)sz / GYRO_CALIB_SAMPLES;
+  Serial.println("Calibration Done.");
+}
+
+// =================================================
+int readFLEX(int pin) {
+  long sum = 0;
+  for (int i = 0; i < ADC_SAMPLES; i++) {
+    sum += analogRead(pin);
+    delayMicroseconds(50); // Small delay to decouple reads
+  }
+  return (int)(sum / ADC_SAMPLES);
+}
+
+// =================================================
 void setup() {
   Serial.begin(115200);
+  delay(1500);
 
-  // ---- ESP32 ADC CONFIG ----
-  analogReadResolution(12);          // 0–4095
-  analogSetAttenuation(ADC_11db);    // Full 3.3V range
+  // ---- WIFI ----
+  connectWiFi();
 
-  // ---- I2C INIT ----
-  Wire.begin(SDA_PIN, SCL_PIN);
+  // ---- UDP ----
+  udp.begin(udpPort);
 
-  // ---- MPU6050 INIT ----
-  Wire.beginTransmission(MPU_ADDRESS);
-  Wire.write(0x6B);     // Power management
-  Wire.write(0x00);     // Wake up
-  Wire.endTransmission(true);
+  // ---- I2C ----
+  Wire.begin(21, 22);
+  delay(100);
 
-  // Accelerometer ±2g
-  Wire.beginTransmission(MPU_ADDRESS);
-  Wire.write(0x1C);
-  Wire.write(0x00);
-  Wire.endTransmission(true);
+  // ---- MPU ----
+  mpu.initialize();
+  delay(100);
+  mpu.setSleepEnabled(false);
+  delay(100);
 
-  // Gyroscope ±250°/s
-  Wire.beginTransmission(MPU_ADDRESS);
-  Wire.write(0x1B);
-  Wire.write(0x00);
-  Wire.endTransmission(true);
-
-  // Init flex buffers
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < SAMPLE_SIZE; j++) {
-      flexBuffer[i][j] = 0;
-    }
-  }
-
-  delay(200);
+  // ---- GYRO CALIB ----
+  calibrateGyro();
 }
 
-// ==================================================
-// LOOP
-// ==================================================
+// =================================================
 void loop() {
-  if (millis() - lastSendTime >= SEND_INTERVAL) {
-    lastSendTime = millis();
+  // -------- FLEX READ + CALIB --------
+  for (int i = 0; i < FLEX_COUNT; i++) {
+    // ADC Noise Reduction: Multisampling
+    flexRaw[i] = readFLEX(flexPins[i]);
+    
+    flexMin[i] = min(flexMin[i], flexRaw[i]);
+    flexMax[i] = max(flexMax[i], flexRaw[i]);
 
-    int flexPins[4] = {FLEX_INDEX, FLEX_MIDDLE, FLEX_RING, FLEX_PINKY};
-    int flexValues[4];
-
-    // ---------- FLEX SENSOR READ ----------
-    for (int i = 0; i < 4; i++) {
-      int raw = analogRead(flexPins[i]);
-      flexBuffer[i][bufferIndex] = raw;
-
-      long sum = 0;
-      for (int j = 0; j < SAMPLE_SIZE; j++) {
-        sum += flexBuffer[i][j];
-      }
-
-      int smooth = sum / SAMPLE_SIZE;
-
-      // ---- SAFETY CHECK FOR BAD CALIBRATION ----
-      if (FLEX_MAX[i] - FLEX_MIN[i] < 100) {
-        flexValues[i] = 0;
-      } else {
-        flexValues[i] = map(smooth, FLEX_MIN[i], FLEX_MAX[i], 0, 100);
-        flexValues[i] = constrain(flexValues[i], 0, 100);
-      }
+    if (flexMax[i] != flexMin[i]) {
+      flexNorm[i] = (float)(flexRaw[i] - flexMin[i]) /
+                    (flexMax[i] - flexMin[i]);
+    } else {
+      flexNorm[i] = 0.0;
     }
 
-    bufferIndex = (bufferIndex + 1) % SAMPLE_SIZE;
+    flexNorm[i] = constrain(flexNorm[i], 0.0, 1.0);
 
-    // ---------- MPU6050 READ ----------
-    Wire.beginTransmission(MPU_ADDRESS);
-    Wire.write(0x3B);
-    Wire.endTransmission(false);
-    Wire.requestFrom(MPU_ADDRESS, 14, true);
-
-    accelX = Wire.read() << 8 | Wire.read();
-    accelY = Wire.read() << 8 | Wire.read();
-    accelZ = Wire.read() << 8 | Wire.read();
-
-    Wire.read(); Wire.read(); // temperature discard
-
-    gyroX = Wire.read() << 8 | Wire.read();
-    gyroY = Wire.read() << 8 | Wire.read();
-    gyroZ = Wire.read() << 8 | Wire.read();
-
-    // ---------- NORMALIZATION ----------
-    float accelXg = (accelX / 16384.0) * 100.0;
-    float accelYg = (accelY / 16384.0) * 100.0;
-    float accelZg = (accelZ / 16384.0) * 100.0;
-
-    float gyroXdeg = gyroX / 131.0;
-    float gyroYdeg = gyroY / 131.0;
-    float gyroZdeg = gyroZ / 131.0;
-
-    // ---------- SERIAL OUTPUT ----------
-    Serial.print(flexValues[0]); Serial.print(",");
-    Serial.print(flexValues[1]); Serial.print(",");
-    Serial.print(flexValues[2]); Serial.print(",");
-    Serial.print(flexValues[3]); Serial.print(",");
-    Serial.print(accelXg, 2); Serial.print(",");
-    Serial.print(accelYg, 2); Serial.print(",");
-    Serial.print(accelZg, 2); Serial.print(",");
-    Serial.print(gyroXdeg, 2); Serial.print(",");
-    Serial.print(gyroYdeg, 2); Serial.print(",");
-    Serial.println(gyroZdeg, 2);
+    flexSmooth[i] = SMOOTH_ALPHA * flexSmooth[i] +
+                    (1.0 - SMOOTH_ALPHA) * flexNorm[i];
   }
-}
 
+  // -------- MPU READ --------
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+  float accX = ax / 16384.0;
+  float accY = ay / 16384.0;
+  float accZ = az / 16384.0;
+
+  float gyroX = (gx - gyroBiasX) / 2000.0;
+  float gyroY = (gy - gyroBiasY) / 2000.0;
+  float gyroZ = (gz - gyroBiasZ) / 2000.0;
+
+  accSmooth[0] = SMOOTH_ALPHA * accSmooth[0] + (1 - SMOOTH_ALPHA) * accX;
+  accSmooth[1] = SMOOTH_ALPHA * accSmooth[1] + (1 - SMOOTH_ALPHA) * accY;
+  accSmooth[2] = SMOOTH_ALPHA * accSmooth[2] + (1 - SMOOTH_ALPHA) * accZ;
+
+  gyroSmooth[0] = SMOOTH_ALPHA * gyroSmooth[0] + (1 - SMOOTH_ALPHA) * gyroX;
+  gyroSmooth[1] = SMOOTH_ALPHA * gyroSmooth[1] + (1 - SMOOTH_ALPHA) * gyroY;
+  gyroSmooth[2] = SMOOTH_ALPHA * gyroSmooth[2] + (1 - SMOOTH_ALPHA) * gyroZ;
+
+  // -------- BUILD UDP PAYLOAD --------
+  String payload = "FLEX:";
+  for (int i = 0; i < FLEX_COUNT; i++) {
+    payload += String(flexSmooth[i], 3);
+    if (i < FLEX_COUNT - 1) payload += ",";
+  }
+
+  payload += " | ACC:";
+  payload += String(accSmooth[0], 3) + ",";
+  payload += String(accSmooth[1], 3) + ",";
+  payload += String(accSmooth[2], 3);
+
+  payload += " | GYR:";
+  payload += String(gyroSmooth[0], 3) + ",";
+  payload += String(gyroSmooth[1], 3) + ",";
+  payload += String(gyroSmooth[2], 3);
+
+  // -------- SEND UDP --------
+  if (WiFi.status() == WL_CONNECTED) {
+    udp.beginPacket(laptopIP, udpPort);
+    udp.print(payload);
+    udp.endPacket();
+  }
+
+  // Serial debug output (optional)
+  // Serial.println(payload);
+
+  delay(40); // ~25 Hz
+}

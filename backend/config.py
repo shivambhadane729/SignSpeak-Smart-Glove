@@ -1,7 +1,10 @@
-# config.py
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BACKEND_NAME = "SignSpeak Backend"
 POLL_RATE_HZ = 10
-# config.py
-GEMINI_API_KEY = "AIzaSyAMHl5qiaOg0q_XcJORBVhYSj9tuY_-0cA"
+# Secrets
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 USE_GEMINI = True

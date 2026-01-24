@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import audio, sensors
-from services.tcp_service import tcp_service
+from services.udp_service import udp_service
+from services.serial_service import serial_service
 import logging
 
 # Logging
@@ -21,13 +22,17 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("Starting up...")
-    # Start TCP Server for Wireless ESP32
-    tcp_service.start() 
+    logger.info("Starting up SignSpeak Backend...")
+    try:
+        udp_service.start()
+        serial_service.start()
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    tcp_service.stop()
+    udp_service.stop()
+    # serial_service.stop()
 
 # Routes
 app.include_router(sensors.router)
@@ -35,4 +40,4 @@ app.include_router(audio.router, prefix="/audio", tags=["Audio"])
 
 @app.get("/")
 def root():
-    return {"status": "SignSpeak backend running (Wireless Mode)"}
+    return {"status": "SignSpeak backend running (WiFi/UDP Mode)"}

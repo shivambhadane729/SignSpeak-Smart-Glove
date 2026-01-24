@@ -70,6 +70,53 @@ body {
   font-weight: 600;
 }
 
+.power-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.power-btn.on {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--success-color);
+  border-color: var(--success-color);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.power-btn.off {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.online {
+  background: var(--success-color);
+  box-shadow: 0 0 8px var(--success-color);
+}
+
+.status-dot.offline {
+  background: var(--danger-color);
+}
+
 /* CONTENT */
 .app-content {
   flex: 1;
