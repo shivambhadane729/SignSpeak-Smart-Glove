@@ -31,7 +31,7 @@ async def shutdown_event():
 
 # Routes
 app.include_router(sensors.router)
-# app.include_router(audio.router) # Uncomment if you have audio routes
+app.include_router(audio.router, prefix="/audio", tags=["Audio"])
 
 @app.get("/")
 def root():

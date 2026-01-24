@@ -18,122 +18,77 @@ SignSpeak-Smart-Glove/
 │   └── .env.example            Environment variables template
 │
 ├── docs/                        Documentation
-│   ├── problem_statement.md    Problem statement
+│   ├── PRD.md                  Product Requirements Document
 │   ├── INSTALLATION.md         Installation guide
 │   ├── USAGE.md                Usage guide
 │   ├── API_REFERENCE.md        API documentation
 │   ├── CONTRIBUTING.md         Contribution guidelines
-│   ├── PROJECT_STRUCTURE.md    This file
-│   ├── system_architecture.png (add your diagram)
-│   ├── flow_diagram.png        (add your diagram)
-│   ├── circuit_diagram.png      (add your diagram)
-│   └── presentation.pdf        (add your PDF)
+│   └── PROJECT_STRUCTURE.md    This file
 │
 ├── hardware/                    Hardware files
 │   ├── esp32_firmware/
 │   │   └── esp32.ino           ESP32 Arduino firmware
-│   ├── circuit_diagram.fzz     Fritzing circuit file (add your file)
-│   ├── components_list.md      Hardware components list
-│   └── libraries.txt           Arduino library requirements
+│   ├── circuit_diagram.fzz     Fritzing circuit file
+│   └── components_list.md      Hardware components list
+│
+├── backend/                     (Wireless Mode)
+│   ├── main.py                 FastAPI Server
+│   ├── services/
+│   │   ├── tcp_service.py      TCP Server for ESP32
+│   │   └── gemini_service.py   Gemini Integration
+│   └── api/
+│       └── routes/             API Endpoints
+│
+├── software/                    (Wired Mode - Legacy)
+│   ├── main.py                 Python Serial App
+│   ├── gesture_classifier.py   ML Logic
+│   └── gemini_language_engine.py
+│
+├── web-dashboard/               (Frontend)
+│   ├── src/                    React source code
+│   ├── public/                 Static assets
+│   └── package.json            Node dependencies
 │
 ├── ml/                          Machine Learning
 │   ├── dataset/                Training datasets
-│   │   ├── HELLO_dynamic.csv
-│   │   └── WE_dynamic.csv
 │   ├── training/               Training scripts
-│   │   ├── train_model.py      Model training script
-│   │   └── data_logger.py     Data collection script
-│   ├── models/                 Trained models
-│   │   ├── gesture_model.pkl   Random Forest model
-│   │   ├── label_encoder.pkl   Label encoder
-│   │   └── WE.pkl             (backup model)
-│   └── inference.py           Standalone inference script
-│
-├── software/                    Main application
-│   ├── main.py                 Main application pipeline
-│   ├── gesture_classifier.py   Gesture recognition module
-│   ├── gemini_language_engine.py Google Gemini integration
-│   └── text_to_speech.py       TTS handler
+│   └── models/                 Trained models
 │
 ├── utils/                       Utility scripts
-│   ├── data_visualizer.py      Data visualization tools
-│   └── model_evaluator.py     Model evaluation tools
+│   ├── live_monitor.py         Live sensor data monitor
+│   └── dynamic_tester.py       Dynamic testing utility
+│
+├── scripts/                     (Archived/Moved)
 │
 ├── tests/                       Unit tests
-│   ├── test_gesture_classifier.py
-│   └── test_data_processing.py
-│
-├── scripts/                     Development/test scripts
-│   ├── README.md
-│   ├── live_test.py
-│   ├── dynamic_testing.py
-│   └── ... (other test scripts)
-│
-├── demo/                        Demo materials
-│   ├── demo_video_link.txt     Demo video link
-│   └── screenshots/             Screenshot images
 │
 ├── logs/                        Log files (created at runtime)
-│   └── .gitkeep
 │
 └── archive/                     Old/experimental files
-    ├── README.md
-    └── ... (archived files)
+    ├── experiments/            (From TRY folder)
+    └── scripts/                (Old scripts)
 ```
 
 ## 📊 Project Statistics
 
-- **Total Directories**: 12+
-- **Python Modules**: 15+
-- **Documentation Files**: 10+
-- **Configuration Files**: 3
-- **Test Files**: 2+
-- **Utility Scripts**: 5+
+- **Total Directories**: 14+
+- **Python Modules**: 20+
+- **Documentation Files**: 6+
 
 ## 🎯 Key Components
 
-### Core Application
-- `software/main.py` - Main pipeline orchestrating all components
-- `software/gesture_classifier.py` - ML-based gesture recognition
-- `software/gemini_language_engine.py` - AI-powered sentence generation
-- `software/text_to_speech.py` - Speech synthesis
+### Backend (Wireless)
+- `backend/main.py`: Central FastAPI server.
+- `backend/services/tcp_service.py`: Handles high-speed TCP data from ESP32.
 
-### Machine Learning
-- `ml/training/train_model.py` - Model training with Random Forest
-- `ml/training/data_logger.py` - Data collection tool
-- `ml/inference.py` - Standalone inference
-- `ml/models/` - Trained models storage
+### Software (Wired)
+- `software/main.py`: Legacy serial-based application.
 
-### Hardware
-- `hardware/esp32_firmware/esp32.ino` - ESP32 firmware
-- `hardware/components_list.md` - Hardware BOM
-
-### Configuration
-- `config/config.py` - Centralized configuration
-- `config/.env.example` - Environment variables template
-
-### Documentation
-- `README.md` - Main project documentation
-- `docs/INSTALLATION.md` - Setup instructions
-- `docs/USAGE.md` - Usage guide
-- `docs/API_REFERENCE.md` - API documentation
-
-### Utilities
-- `utils/data_visualizer.py` - Data visualization
-- `utils/model_evaluator.py` - Model evaluation
-- `setup.py` - Automated setup script
+### Web Dashboard
+- `web-dashboard/`: Modern React-based UI for visualization and control.
 
 ## ✅ Organization Status
 
-All files are now organized into appropriate folders:
-- ✅ No loose files in root (except essential files)
-- ✅ All code in proper directories
-- ✅ Documentation complete
-- ✅ Configuration centralized
-- ✅ Tests organized
-- ✅ Utilities separated
-- ✅ Old files archived
-
-## 🚀 Ready for Git Submission
-
-The project is fully organized and ready for version control!
+- ✅ `backend` and `web-dashboard` documented.
+- ✅ `TRY` and loose scripts archived.
+- ✅ `utils` created for shared tools.
